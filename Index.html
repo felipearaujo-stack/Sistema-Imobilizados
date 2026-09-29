@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>magalu | Painel de Acompanhamento T.I. - Ativos & VPN</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-body: #f8fafc;
+      --bg-sidebar: #0f172a;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      
+      --brand-blue: #0086ff;
+      --brand-blue-hover: #0060c7;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-white: #ffffff;
+
+      --sidebar-width: 240px;
+      --header-height: 60px;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+    .app-layout { display: flex; width: 100vw; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-sidebar);
+      color: var(--text-white);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-brand {
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 15px;
+      font-weight: 800;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .sidebar-brand span { color: #ff007f; margin-left: 2px; }
+
+    .sidebar-menu { list-style: none; padding: 20px 12px; flex: 1; }
+    .sidebar-item { margin-bottom: 4px; }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius);
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-link:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .sidebar-link.active { color: #fff; background: var(--brand-blue); }
+    .sidebar-link i { font-size: 15px; width: 18px; text-align: center; }
+
+    /* HEADER */
+    .content-wrapper { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .top-header {
+      height: var(--header-height);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+    }
+
+    .top-header-title { font-size: 14px; font-weight: 700; }
+
+    /* MAIN */
+    .main-content { padding: 30px; flex: 1; max-width: 1500px; margin: 0 auto; width: 100%; }
+    .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; margin-bottom: 25px; }
+
+    /* TOOLBAR */
+    .toolbar-section { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .search-box { flex: 1; max-width: 380px; position: relative; }
+    .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .filter-select {
+      padding: 9px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--brand-blue);
+      color: var(--text-white);
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: var(--brand-blue-hover); }
+
+    .btn-logout {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 10px;
+    }
+    .btn-logout:hover { background: #fca5a5; }
+
+    /* TABELA */
+    .table-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); overflow: hidden; }
+    .enterprise-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    .enterprise-table th { background: #f8fafc; padding: 14px 16px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+    .enterprise-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    .enterprise-table tbody tr:hover { background: #f8fafc; }
+
+    /* BADGES */
+    .badge-vpn-ativa { background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-vpn-inativa { background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-cd { background: #f3e8ff; color: #6b21a8; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 11px; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(2px);
+      z-index: 300;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-card {
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 640px;
+      padding: 28px;
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .modal-close { position: absolute; top: 18px; right: 18px; background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .form-group input, .form-group select { width: 100%; padding: 10px 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 13px; outline: none; }
+
+    .view-pane { display: none; }
+    .view-pane.active { display: block; }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        magalu | T.I.<span>.</span>
+      </div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a href="#" class="sidebar-link active" id="navPainel" onclick="mudarAba('painel'); return false;">
+            <i class="fas fa-list-check"></i>
+            <span>Painel de Ativos & VPN</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" class="sidebar-link" id="navConfig" onclick="mudarAba('config'); return false;">
+            <i class="fas fa-sliders"></i>
+            <span>Configurar CDs</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <div class="content-wrapper">
+      
+      <!-- HEADER -->
+      <header class="top-header">
+        <div class="top-header-title">magalu | Painel de Acompanhamento T.I.</div>
+        <div id="authStatus">
+          <button class="btn-primary" onclick="abrirModalLogin()"><i class="fas fa-lock"></i> Login T.I.</button>
+        </div>
+      </header>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <main class="main-content">
+        
+        <!-- TELA 1: PAINEL DE ACOMPANHAMENTO -->
+        <div id="panePainel" class="view-pane active">
+          <div class="page-title-section">
+            <h1 class="page-title">Painel de Acompanhamento de Dispositivos, VPN & Gerência</h1>
+            <p class="page-subtitle">Consulta consolidada de IMEI, aparelhos, colaboradores, e-mail VPN, área solicitante, gerente e políticas.</p>
+          </div>
+
+          <div class="toolbar-section">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="buscaGeral" class="search-input" placeholder="Buscar por Colaborador, IMEI, E-mail VPN, Gerente ou Área..." oninput="carregarPainel()" />
+            </div>
+
+            <!-- FILTRO DINÂMICO POR ÁREA SOLICITANTE -->
+            <select id="filtroAreaSolicitante" class="filter-select" onchange="carregarPainel()">
+              <option value="todos">Todas as Áreas Solicitantes</option>
+            </select>
+
+            <!-- BOTAO DE REGISTRO EXCLUSIVO DO T.I. -->
+            <button class="btn-primary" onclick="abrirModalFormularioTi()"><i class="fas fa-plus"></i> Registrar Ativo (T.I.)</button>
+          </div>
+
+          <div class="table-container">
+            <table class="enterprise-table">
+              <thead>
+                <tr>
+                  <th>IMEI</th>
+                  <th>Modelo Aparelho</th>
+                  <th>Colaborador</th>
+                  <th>E-mail VPN</th>
+                  <th>VPN Ativa?</th>
+                  <th>Área Solicitante</th>
+                  <th>Gerente da Área</th>
+                  <th>Política</th>
+                  <th>CD</th>
+                  <th style="text-align: right;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaPainelBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TELA 2: CONFIGURAÇÃO DE CDs -->
+        <div id="paneConfig" class="view-pane">
+          <div class="page-title-section">
+            <h1 class="page-title">Configuração de Centros de Distribuição (CDs)</h1>
+            <p class="page-subtitle">Gerenciamento de CDs e Localidades corporativas (Acesso Restrito `Admin.T.I`).</p>
+          </div>
+
+          <div class="toolbar-section">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="buscaCd" class="search-input" placeholder="Buscar por Código do CD ou Localidade..." oninput="carregarCds()" />
+            </div>
+            <button class="btn-primary" onclick="novoCdModal()"><i class="fas fa-plus"></i> Criar Novo CD</button>
+          </div>
+
+          <div class="table-container">
+            <table class="enterprise-table">
+              <thead>
+                <tr>
+                  <th>Código do CD</th>
+                  <th>Localidade / Cidade</th>
+                  <th style="text-align: right;">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaCdBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL DE LOGIN (T.I. UNICO) -->
+  <div id="modalLogin" class="modal-overlay">
+    <div class="modal-card" style="max-width: 360px; text-align: center;">
+      <button class="modal-close" onclick="fecharModal('modalLogin')"><i class="fas fa-times"></i></button>
+      <h2 style="color: var(--brand-blue); margin-bottom: 4px;">magalu.</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Autenticação Restrita T.I.</p>
+      <form onsubmit="autenticarTi(event)">
+        <div class="form-group">
+          <label>Usuário / E-mail</label>
+          <input type="text" id="tiUser" placeholder="Admin.T.I" required />
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" id="tiPass" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Acessar Painel T.I.</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL FORMULÁRIO EXCLUSIVO DO T.I. -->
+  <div id="modalFormTi" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="fecharModal('modalFormTi')"><i class="fas fa-times"></i></button>
+      <h3 style="color: var(--brand-blue); margin-bottom: 15px;"><i class="fas fa-shield-halved"></i> Preenchimento Interno T.I.</h3>
+      
+      <form onsubmit="salvarAtivoTi(event)">
+        <input type="hidden" id="ativoEditImei" />
+
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Área / Setor Solicitante *</label>
+            <input type="text" id="tiAreaSolicitante" placeholder="Ex: LuizaLabs, DQS, Logística" required />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Gerente da Área *</label>
+            <input type="text" id="tiGerenteArea" placeholder="Ex: Ricardo Santos" required />
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Colaborador *</label>
+            <input type="text" id="tiColaborador" placeholder="Ex: Felipe Araújo" required />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>E-mail Corporativo para VPN *</label>
+            <input type="email" id="tiEmailVpn" placeholder="felipe.vpn@magazineluiza.com.br" required />
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>VPN Ativa no Colaborador? *</label>
+            <select id="tiVpnStatus" required>
+              <option value="SIM">Sim (VPN Ativa)</option>
+              <option value="NÃO">Não (Inativa / Isento)</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Modelo do Aparelho *</label>
+            <input type="text" id="tiModeloAparelho" placeholder="Ex: Apple iPhone 17 / Zebra TC21" required />
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Código IMEI (15 dígitos) *</label>
+            <input type="text" id="tiImei" placeholder="Ex: 863920194820194" required />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Política Aplicada *</label>
+            <input type="text" id="tiPolitica" placeholder="Ex: MDM Corporativo / Kiosk Mode" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Centro de Distribuição (CD) *</label>
+          <select id="tiCdSelect" required>
+            <!-- Preenchido via JS -->
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">
+          <i class="fas fa-save"></i> Gravar Informações no Painel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CRIAR CD -->
+  <div id="modalCd" class="modal-overlay">
+    <div class="modal-card" style="max-width: 500px;">
+      <button class="modal-close" onclick="fecharModal('modalCd')"><i class="fas fa-times"></i></button>
+      <h3 style="color: var(--brand-blue); margin-bottom: 15px;">Cadastrar Novo Centro de Distribuição (CD)</h3>
+      <form onsubmit="salvarCd(event)">
+        <div class="form-group">
+          <label>Código do CD *</label>
+          <input type="text" id="cdCodigoInput" placeholder="Ex: CD 300, CD 500, CD 900" required />
+        </div>
+        <div class="form-group">
+          <label>Localidade / Cidade - Estado *</label>
+          <input type="text" id="cdLocalidadeInput" placeholder="Ex: Louveira - SP / Franco da Rocha - SP" required />
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Salvar CD</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const KEY_ATIVOS = 'db_ativos_vpn_ti_magalu';
+    const KEY_CD = 'db_cd_configuracao_somente';
+    let tiLogado = false;
+
+    window.onload = function() {
+      carregarBaseInicial();
+      preencherSelectCd();
+      carregarPainel();
+      carregarCds();
+    };
+
+    function lerAtivos() { return JSON.parse(localStorage.getItem(KEY_ATIVOS) || '[]'); }
+    function salvarAtivos(d) { localStorage.setItem(KEY_ATIVOS, JSON.stringify(d)); }
+
+    function lerCD() { return JSON.parse(localStorage.getItem(KEY_CD) || '[]'); }
+    function salvarCD(d) { localStorage.setItem(KEY_CD, JSON.stringify(d)); }
+
+    function carregarBaseInicial() {
+      if (lerCD().length === 0) {
+        salvarCD([{ codigo: "CD 300", localidade: "Louveira - SP" }]);
+      }
+
+      if (lerAtivos().length === 0) {
+        salvarAtivos([
+          { 
+            imei: "863920194820194", 
+            modelo: "Apple iPhone 17", 
+            colaborador: "Felipe Araújo", 
+            emailVpn: "felipe.araujo@luizalabs.com",
+            vpn: "SIM", 
+            areaSolicitante: "LuizaLabs", 
+            gerenteArea: "Carlos Eduardo",
+            politica: "MDM Corporativo Padrão", 
+            cd: "CD 300", 
+            localidade: "Louveira - SP" 
+          }
+        ]);
+      }
+    }
+
+    function preencherSelectCd() {
+      const cds = lerCD();
+      const selectForm = document.getElementById('tiCdSelect');
+      selectForm.innerHTML = '';
+      cds.forEach(c => {
+        selectForm.innerHTML += `<option value="${c.codigo}">${c.codigo} (${c.localidade})</option>`;
+      });
+    }
+
+    function mudarAba(aba) {
+      document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+      if (aba === 'painel') {
+        document.getElementById('panePainel').classList.add('active');
+        document.getElementById('navPainel').classList.add('active');
+      } else if (aba === 'config') {
+        document.getElementById('paneConfig').classList.add('active');
+        document.getElementById('navConfig').classList.add('active');
+      }
+    }
+
+    /* FILTROS DINÂMICOS POR ÁREA SOLICITANTE */
+    function atualizarFiltroAreaSolicitante() {
+      const ativos = lerAtivos();
+      const select = document.getElementById('filtroAreaSolicitante');
+      const valorAtual = select.value;
+      
+      const areasUnicas = [...new Set(ativos.map(x => x.areaSolicitante).filter(Boolean))];
+      
+      select.innerHTML = '<option value="todos">Todas as Áreas Solicitantes</option>';
+      areasUnicas.forEach(a => {
+        select.innerHTML += `<option value="${a}">${a}</option>`;
+      });
+
+      select.value = valorAtual;
+    }
+
+    /* PAINEL DE ACOMPANHAMENTO DE ATIVOS */
+    function carregarPainel() {
+      atualizarFiltroAreaSolicitante();
+      const lista = lerAtivos();
+      const busca = (document.getElementById('buscaGeral').value || '').toLowerCase();
+      const filtroArea = document.getElementById('filtroAreaSolicitante').value;
+      const tbody = document.getElementById('tabelaPainelBody');
+      tbody.innerHTML = '';
+
+      const filtrados = lista.filter(i => {
+        const atendeBusca = i.imei.toLowerCase().includes(busca) || 
+                            i.modelo.toLowerCase().includes(busca) || 
+                            i.colaborador.toLowerCase().includes(busca) ||
+                            (i.emailVpn || '').toLowerCase().includes(busca) ||
+                            (i.gerenteArea || '').toLowerCase().includes(busca) ||
+                            i.politica.toLowerCase().includes(busca) ||
+                            (i.cd || '').toLowerCase().includes(busca);
+        const atendeArea = (filtroArea === 'todos') || (i.areaSolicitante === filtroArea);
+        return atendeBusca && atendeArea;
+      });
+
+      if (!filtrados.length) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-muted);">Nenhum ativo localizado.</td></tr>';
+        return;
+      }
+
+      filtrados.forEach(item => {
+        const badgeVpn = item.vpn === 'SIM' ? 
+          '<span class="badge-vpn-ativa"><i class="fas fa-check"></i> Ativa</span>' : 
+          '<span class="badge-vpn-inativa"><i class="fas fa-times"></i> Inativa</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item.imei}</strong></td>
+          <td>${item.modelo}</td>
+          <td>${item.colaborador}</td>
+          <td><small style="font-weight:600; color:var(--text-muted);">${item.emailVpn || 'N/A'}</small></td>
+          <td>${badgeVpn}</td>
+          <td><strong style="color:var(--brand-blue);">${item.areaSolicitante}</strong></td>
+          <td>${item.gerenteArea || 'N/A'}</td>
+          <td>${item.politica}</td>
+          <td><span class="badge-cd">${item.cd || 'CD 300'}</span></td>
+          <td style="text-align:right;">
+            <button style="background:none; border:none; color:var(--brand-blue); cursor:pointer; margin-right:8px;" title="Editar" onclick="editarAtivoTi('${item.imei}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Excluir" onclick="excluirAtivoTi('${item.imei}')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* FORMULÁRIO EXCLUSIVO DO T.I. */
+    function abrirModalFormularioTi() {
+      if (!tiLogado) return alertAcesso();
+      preencherSelectCd();
+      document.getElementById('ativoEditImei').value = '';
+      document.getElementById('tiAreaSolicitante').value = '';
+      document.getElementById('tiGerenteArea').value = '';
+      document.getElementById('tiColaborador').value = '';
+      document.getElementById('tiEmailVpn').value = '';
+      document.getElementById('tiVpnStatus').value = 'SIM';
+      document.getElementById('tiModeloAparelho').value = '';
+      document.getElementById('tiImei').value = '';
+      document.getElementById('tiPolitica').value = '';
+      abrirModal('modalFormTi');
+    }
+
+    function editarAtivoTi(imeiTarget) {
+      if (!tiLogado) return alertAcesso();
+      preencherSelectCd();
+      const item = lerAtivos().find(x => x.imei === imeiTarget);
+      if (!item) return;
+
+      document.getElementById('ativoEditImei').value = item.imei;
+      document.getElementById('tiAreaSolicitante').value = item.areaSolicitante;
+      document.getElementById('tiGerenteArea').value = item.gerenteArea || '';
+      document.getElementById('tiColaborador').value = item.colaborador;
+      document.getElementById('tiEmailVpn').value = item.emailVpn || '';
+      document.getElementById('tiVpnStatus').value = item.vpn;
+      document.getElementById('tiModeloAparelho').value = item.modelo;
+      document.getElementById('tiImei').value = item.imei;
+      document.getElementById('tiPolitica').value = item.politica;
+      document.getElementById('tiCdSelect').value = item.cd || 'CD 300';
+
+      abrirModal('modalFormTi');
+    }
+
+    function salvarAtivoTi(e) {
+      e.preventDefault();
+      if (!tiLogado) return alertAcesso();
+
+      const editImei = document.getElementById('ativoEditImei').value;
+      const imeiCode = document.getElementById('tiImei').value.trim();
+      const cdCodigo = document.getElementById('tiCdSelect').value;
+      const cdObj = lerCD().find(x => x.codigo === cdCodigo) || { localidade: 'Louveira - SP' };
+
+      let ativos = lerAtivos();
+
+      if (!editImei && ativos.some(x => x.imei === imeiCode)) {
+        return alert('Este IMEI já se encontra cadastrado no painel.');
+      }
+
+      const registro = {
+        areaSolicitante: document.getElementById('tiAreaSolicitante').value.trim(),
+        gerenteArea: document.getElementById('tiGerenteArea').value.trim(),
+        colaborador: document.getElementById('tiColaborador').value.trim(),
+        emailVpn: document.getElementById('tiEmailVpn').value.trim().toLowerCase(),
+        vpn: document.getElementById('tiVpnStatus').value,
+        modelo: document.getElementById('tiModeloAparelho').value.trim(),
+        imei: imeiCode,
+        politica: document.getElementById('tiPolitica').value.trim(),
+        cd: cdCodigo,
+        localidade: cdObj.localidade
+      };
+
+      if (editImei) {
+        const index = ativos.findIndex(x => x.imei === editImei);
+        if (index !== -1) ativos[index] = registro;
+      } else {
+        ativos.unshift(registro);
+      }
+
+      salvarAtivos(ativos);
+      fecharModal('modalFormTi');
+      carregarPainel();
+      alert('✅ Informações gravadas com sucesso no painel de acompanhamento!');
+    }
+
+    function excluirAtivoTi(imei) {
+      if (!tiLogado) return alertAcesso();
+      if (confirm(`Deseja remover o ativo com IMEI ${imei}?`)) {
+        salvarAtivos(lerAtivos().filter(x => x.imei !== imei));
+        carregarPainel();
+      }
+    }
+
+    /* CONFIGURAÇÃO DE CDs */
+    function carregarCds() {
+      const lista = lerCD();
+      const busca = (document.getElementById('buscaCd').value || '').toLowerCase();
+      const tbody = document.getElementById('tabelaCdBody');
+      tbody.innerHTML = '';
+
+      const filtrados = lista.filter(c => c.codigo.toLowerCase().includes(busca) || c.localidade.toLowerCase().includes(busca));
+
+      if (!filtrados.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">Nenhum CD cadastrado.</td></tr>';
+        return;
+      }
+
+      filtrados.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item.codigo}</strong></td>
+          <td>${item.localidade}</td>
+          <td style="text-align:right;">
+            <button style="background:none; border:none; color:#ef4444; cursor:pointer;" onclick="excluirCd('${item.codigo}')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function novoCdModal() {
+      if (!tiLogado) return alertAcesso();
+      document.getElementById('cdCodigoInput').value = '';
+      document.getElementById('cdLocalidadeInput').value = '';
+      abrirModal('modalCd');
+    }
+
+    function salvarCd(e) {
+      e.preventDefault();
+      if (!tiLogado) return alertAcesso();
+
+      const cds = lerCD();
+      const codigo = document.getElementById('cdCodigoInput').value.trim();
+      const localidade = document.getElementById('cdLocalidadeInput').value.trim();
+
+      if (cds.some(x => x.codigo.toLowerCase() === codigo.toLowerCase())) {
+        return alert('Este Código de CD já está cadastrado.');
+      }
+
+      cds.unshift({ codigo, localidade });
+      salvarCD(cds);
+      preencherSelectCd();
+      fecharModal('modalCd');
+      carregarCds();
+      alert('✅ Novo Centro de Distribuição cadastrado!');
+    }
+
+    function excluirCd(codigo) {
+      if (!tiLogado) return alertAcesso();
+      if (lerCD().length <= 1) return alert('É necessário manter pelo menos 1 CD ativo no sistema.');
+      
+      if (confirm(`Excluir o ${codigo}?`)) {
+        salvarCD(lerCD().filter(x => x.codigo !== codigo));
+        preencherSelectCd();
+        carregarCds();
+      }
+    }
+
+    /* AUTENTICAÇÃO RÍGIDA DO T.I. & LOGOUT */
+    function autenticarTi(e) {
+      e.preventDefault();
+      const user = document.getElementById('tiUser').value.trim();
+      const pass = document.getElementById('tiPass').value.trim();
+
+      if (user === 'Admin.T.I' && pass === 'Magazine 2026#') {
+        tiLogado = true;
+        atualizarBarraLogin();
+        fecharModal('modalLogin');
+        alert('Autenticação T.I. realizada com sucesso!');
+      } else {
+        alert('Credenciais inválidas! Usuário ou Senha incorretos.');
+      }
+    }
+
+    function encerrarSessaoTi() {
+      tiLogado = false;
+      atualizarBarraLogin();
+      alert('🔒 Sessão do Admin.T.I encerrada com sucesso.');
+    }
+
+    function atualizarBarraLogin() {
+      const container = document.getElementById('authStatus');
+      if (tiLogado) {
+        container.innerHTML = `
+          <div style="display: flex; align-items: center;">
+            <span style="font-size:12px; font-weight:700; color:#10b981;">
+              <i class="fas fa-user-check"></i> Admin.T.I Logado
+            </span>
+            <button class="btn-logout" onclick="encerrarSessaoTi()" title="Encerrar Sessão">
+              <i class="fas fa-power-off"></i> Sair
+            </button>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <button class="btn-primary" onclick="abrirModalLogin()"><i class="fas fa-lock"></i> Login T.I.</button>
+        `;
+      }
+    }
+
+    function alertAcesso() {
+      alert('🔒 Acesso Negado! Somente o usuário Admin.T.I logado pode preencher/alterar informações.');
+      abrirModal('modalLogin');
+    }
+
+    function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
+    function abrirModalLogin() { abrirModal('modalLogin'); }
+  </script>
+</body>
+</html>
